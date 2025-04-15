@@ -1,0 +1,188 @@
+/* Стилі для QR-генератора */
+
+.transparent-bg {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+.transparent-bg label {
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.transparent-text {
+  display: flex;
+  align-items: center;
+}
+
+.color-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.color-picker input[type="color"] {
+  width: 55px;
+  height: 45px;
+  padding: 2px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.color-picker input[type="color"]:hover {
+  transform: scale(1.05);
+}
+
+.color-display {
+  flex-grow: 1;
+  height: 45px;
+  border-radius: 10px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s;
+  overflow: hidden;
+}
+
+/* Для скритого елемента */
+.bg-color-option {
+  max-height: 110px;
+  opacity: 1;
+  margin-bottom: 25px;
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.bg-color-option.hidden {
+  max-height: 0;
+  opacity: 0;
+  margin-bottom: 0;
+  pointer-events: none;
+}
+
+/* Стилі для border-radius */
+.radius-control {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.radius-control input[type="range"] {
+  flex-grow: 1;
+  height: 6px;
+  background: #e0e0e0;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: none;
+  border: none;
+  outline: none;
+  appearance: none;
+  margin-top: 8px;
+}
+
+.radius-control input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(90deg, #6e8efb, #a777e3);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+
+.radius-control input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.radius-control input[type="number"] {
+  width: 80px;
+  padding: 10px;
+  text-align: center;
+}
+
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 35px;
+  transition: all 0.3s;
+}
+
+#qrcode {
+  margin-bottom: 25px;
+  padding: 20px;
+  background-color: transparent;
+  border-radius: 16px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s;
+  position: relative;
+}
+
+#qrcode.has-transparent-bg {
+  border: 2px dashed #ccc;
+  background-image:
+      linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+      linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+      linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+#qrcode img {
+  display: block;
+  border-radius: var(--qr-radius, 0px);
+  overflow: hidden;
+}
+
+#qrcode:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.download-options {
+  display: none;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.format-selector {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.format-option {
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 15px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.format-option:hover {
+  border-color: #a777e3;
+  transform: translateY(-2px);
+}
+
+.format-option.active {
+  background: linear-gradient(90deg, #6e8efb, #a777e3);
+  color: white;
+  border-color: transparent;
+}
+
+#download-btn {
+  background: linear-gradient(90deg, #34d399, #10b981);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+#download-btn:hover {
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}

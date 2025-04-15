@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Генератор QR-кодів і Конвертер зображень</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Загальні стилі -->
+  <link rel="stylesheet" href="./style.css">
+  <!-- Стилі інструментів -->
+  <link rel="stylesheet" href="./qr-generator/style.css">
+  <link rel="stylesheet" href="./image-converter/style.css">
+</head>
+<body>
+<div class="container">
+  <h1>Універсальний інструмент</h1>
+
+  <!-- Перемикач між режимами -->
+  <div class="mode-switcher">
+    <span>Конвертер зображень</span>
+    <label class="toggle-switch mode-toggle">
+      <input type="checkbox" id="mode-switch-checkbox" checked>
+      <span class="toggle-slider"></span>
+    </label>
+    <span>Генератор QR-кодів</span>
+  </div>
+
+  <!-- Контейнер для генератора QR-кодів -->
+  <div id="qr-generator-container" class="tool-container active">
+    <div class="input-group">
+      <label for="text">Текст або URL</label>
+      <input type="text" id="text" placeholder="Введіть текст або URL" value="https://example.com">
+    </div>
+
+    <div class="options">
+      <div class="input-group">
+        <label for="size">Розмір</label>
+        <select id="size">
+          <option value="128">Малий (128×128)</option>
+          <option value="256" selected>Середній (256×256)</option>
+          <option value="384">Великий (384×384)</option>
+          <option value="512">Дуже великий (512×512)</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="correction">Рівень корекції</label>
+        <select id="correction">
+          <option value="L">Низький (7%)</option>
+          <option value="M">Середній (15%)</option>
+          <option value="Q">Високий (25%)</option>
+          <option value="H" selected>Дуже високий (30%)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label for="dark-color">Колір QR-коду</label>
+      <div class="color-picker">
+        <input type="color" id="dark-color" value="#000000">
+        <div class="color-display" id="dark-color-display" style="background-color: #000000;"></div>
+      </div>
+    </div>
+
+    <div class="input-group bg-color-option" id="bg-color-container">
+      <label for="light-color">Колір фону</label>
+      <div class="color-picker">
+        <input type="color" id="light-color" value="#FFFFFF">
+        <div class="color-display" id="light-color-display" style="background-color: #FFFFFF;"></div>
+      </div>
+    </div>
+
+    <div class="input-group transparent-bg">
+      <div class="transparent-text">
+        <span>Прозорий фон</span>
+      </div>
+      <label class="toggle-switch">
+        <input type="checkbox" id="transparent-bg">
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+
+    <div class="input-group">
+      <label for="border-radius">Заокруглення кутів</label>
+      <div class="radius-control">
+        <input type="range" id="border-radius-range" min="0" max="50" value="0">
+        <input type="number" id="border-radius-value" min="0" max="50" value="0">
+      </div>
+    </div>
+
+    <button id="generate-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+        <path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3z"></path>
+        <path d="M15 15h2v2h-2z"></path>
+        <path d="M20 15h1v1h-1z"></path>
+        <path d="M21 20h-3v-2h2v-2h2z"></path>
+        <path d="M15 21h2v-2h-2z"></path>
+        <path d="M18 21h2v-2h-2z"></path>
+      </svg>
+      Згенерувати QR-код
+    </button>
+
+    <div class="qr-container">
+      <div id="qrcode"></div>
+      <div class="download-options" id="download-options">
+        <div class="format-selector">
+          <div class="format-option active" data-format="png">PNG</div>
+          <div class="format-option" data-format="svg">SVG</div>
+          <div class="format-option" data-format="jpeg">JPEG</div>
+        </div>
+        <button id="download-btn">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Завантажити QR-код
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Контейнер для конвертера зображень -->
+  <div id="image-converter-container" class="tool-container">
+    <div class="upload-area">
+      <div class="upload-dropzone" id="upload-dropzone">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <h3>Перетягніть файли сюди або клікніть щоб вибрати</h3>
+        <p>Підтримуються: JPG, PNG, GIF, BMP, TIFF</p>
+        <input type="file" id="file-input" multiple accept="image/*" style="display: none;">
+      </div>
+    </div>
+
+    <div class="converter-options">
+      <div class="input-group">
+        <label for="convert-format">Формат конвертації</label>
+        <select id="convert-format">
+          <option value="webp" selected>WebP (найкраще стиснення)</option>
+          <option value="svg">SVG (векторний формат)</option>
+        </select>
+      </div>
+
+      <div class="input-group quality-container">
+        <label for="image-quality">Якість зображення (<span id="quality-value">90</span>%)</label>
+        <input type="range" id="image-quality" min="1" max="100" value="90">
+      </div>
+
+      <div class="input-group">
+        <div class="zip-files-option">
+          <span>Архівувати результати</span>
+          <label class="toggle-switch">
+            <input type="checkbox" id="zip-files" checked>
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button id="convert-btn">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+        <path d="M12 3v12"></path>
+        <path d="m8 11 4 4 4-4"></path>
+        <path d="M8 17h8"></path>
+        <path d="M20 21H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"></path>
+      </svg>
+      Конвертувати зображення
+    </button>
+
+    <div class="status-container hidden" id="status-container">
+      <div class="status-info">
+        <span id="status-text">Обробка зображень...</span>
+        <span id="status-percentage">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+    </div>
+
+    <div class="files-preview" id="files-preview">
+      <!-- Тут будуть відображатися мініатюри завантажених файлів -->
+    </div>
+
+    <div class="download-results hidden" id="download-results">
+      <button id="download-converted-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span id="download-text">Завантажити результати</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Підключення скриптів -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="./qr-generator/script.js"></script>
+<script src="./image-converter/script.js"></script>
+<script>
+	// Скрипт для перемикання між інструментами
+	document.addEventListener('DOMContentLoaded', function() {
+		const modeSwitch = document.getElementById('mode-switch-checkbox');
+		const qrContainer = document.getElementById('qr-generator-container');
+		const converterContainer = document.getElementById('image-converter-container');
+
+		modeSwitch.addEventListener('change', function() {
+			if (this.checked) {
+				qrContainer.classList.add('active');
+				converterContainer.classList.remove('active');
+			} else {
+				qrContainer.classList.remove('active');
+				converterContainer.classList.add('active');
+			}
+		});
+	});
+</script>
+</body>
+</html>
