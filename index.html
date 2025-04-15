@@ -1,284 +1,729 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Генератор QR-кодів</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Arial', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Генератор QR-кодів</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-    body {
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
-    }
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+            line-height: 1.6;
+        }
 
-    .container {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 500px;
-      padding: 30px;
-    }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 550px;
+            padding: 35px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
 
-    h1 {
-      color: #333;
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 24px;
-    }
+        .container:hover {
+            transform: translateY(-5px);
+        }
 
-    .input-group {
-      margin-bottom: 20px;
-    }
+        h1 {
+            color: #4a4a4a;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+        }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: bold;
-      color: #555;
-    }
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            border-radius: 2px;
+        }
 
-    input, select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-      transition: border-color 0.3s;
-    }
+        .input-group {
+            margin-bottom: 25px;
+        }
 
-    input:focus, select:focus {
-      border-color: #007bff;
-      outline: none;
-    }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #4a4a4a;
+            font-size: 15px;
+        }
+        
+        /* Перемикач (тоглер) */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
 
-    .options {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
 
-    .options .input-group {
-      width: 48%;
-    }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e0e0e0;
+            transition: .4s;
+            border-radius: 30px;
+        }
 
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      padding: 12px 20px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-      transition: background-color 0.3s;
-    }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
 
-    button:hover {
-      background-color: #0056b3;
-    }
+        input:checked + .toggle-slider {
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+        }
 
-    .qr-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-top: 30px;
-    }
+        input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        
+        /* Анімації для появи/зникнення опцій */
+        .bg-color-option {
+            max-height: 110px;
+            opacity: 1;
+            margin-bottom: 25px;
+            transition: all 0.5s ease;
+            overflow: hidden;
+        }
+        
+        .bg-color-option.hidden {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+            pointer-events: none;
+        }
+        
+        .transparent-bg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px 0;
+        }
+        
+        .transparent-bg label {
+            margin-bottom: 0;
+            font-weight: 600;
+        }
+        
+        .transparent-text {
+            display: flex;
+            align-items: center;
+        }
 
-    #qrcode {
-      margin-bottom: 20px;
-      padding: 15px;
-      background-color: white;
-      border-radius: 5px;
-    }
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background-color: #fafafa;
+        }
 
-    #download-btn {
-      background-color: #28a745;
-      display: none;
-      margin-top: 10px;
-    }
+        input:focus, select:focus {
+            border-color: #6e8efb;
+            outline: none;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(110, 142, 251, 0.1);
+        }
 
-    #download-btn:hover {
-      background-color: #218838;
-    }
+        input[type="text"]::placeholder {
+            color: #aaa;
+        }
 
-    .color-picker {
-      display: flex;
-      align-items: center;
-    }
+        .options {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            gap: 20px;
+        }
 
-    .color-picker input[type="color"] {
-      width: 50px;
-      height: 40px;
-      padding: 2px;
-      margin-right: 10px;
-    }
+        .options .input-group {
+            width: 50%;
+            margin-bottom: 0;
+        }
 
-    .color-display {
-      width: calc(100% - 60px);
-      height: 40px;
-      border-radius: 5px;
-      border: 1px solid #ddd;
-    }
-  </style>
+        button {
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 15px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(110, 142, 251, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        button:hover {
+            box-shadow: 0 6px 20px rgba(110, 142, 251, 0.4);
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(110, 142, 251, 0.3);
+        }
+
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 35px;
+            transition: all 0.3s;
+        }
+
+        #qrcode {
+            margin-bottom: 25px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        #qrcode:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .download-options {
+            display: none;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .format-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .format-option {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .format-option:hover {
+            border-color: #a777e3;
+            transform: translateY(-2px);
+        }
+
+        .format-option.active {
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            border-color: transparent;
+        }
+
+        #download-btn {
+            background: linear-gradient(90deg, #34d399, #10b981);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        #download-btn:hover {
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .color-picker input[type="color"] {
+            width: 55px;
+            height: 45px;
+            padding: 2px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .color-picker input[type="color"]:hover {
+            transform: scale(1.05);
+        }
+
+        .color-display {
+            flex-grow: 1;
+            height: 45px;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        /* Медіа запити для адаптивності */
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+            
+            .options {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .options .input-group {
+                width: 100%;
+                margin-bottom: 0;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            input, select {
+                padding: 12px;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-  <h1>Генератор QR-кодів</h1>
-
-  <div class="input-group">
-    <label for="text">Текст або URL</label>
-    <input type="text" id="text" placeholder="Введіть текст або URL" value="https://example.com">
-  </div>
-
-  <div class="options">
-    <div class="input-group">
-      <label for="size">Розмір</label>
-      <select id="size">
-        <option value="128">Малий (128×128)</option>
-        <option value="256" selected>Середній (256×256)</option>
-        <option value="384">Великий (384×384)</option>
-        <option value="512">Дуже великий (512×512)</option>
-      </select>
+    <div class="container">
+        <h1>Генератор QR-кодів</h1>
+        
+        <div class="input-group">
+            <label for="text">Текст або URL</label>
+            <input type="text" id="text" placeholder="Введіть текст або URL" value="https://example.com">
+        </div>
+        
+        <div class="options">
+            <div class="input-group">
+                <label for="size">Розмір</label>
+                <select id="size">
+                    <option value="128">Малий (128×128)</option>
+                    <option value="256" selected>Середній (256×256)</option>
+                    <option value="384">Великий (384×384)</option>
+                    <option value="512">Дуже великий (512×512)</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <label for="correction">Рівень корекції</label>
+                <select id="correction">
+                    <option value="L">Низький (7%)</option>
+                    <option value="M">Середній (15%)</option>
+                    <option value="Q">Високий (25%)</option>
+                    <option value="H" selected>Дуже високий (30%)</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="dark-color">Колір QR-коду</label>
+            <div class="color-picker">
+                <input type="color" id="dark-color" value="#000000" style="margin-right: 5px;">
+                <div class="color-display" id="dark-color-display" style="background-color: #000000; flex-grow: 1;"></div>
+            </div>
+        </div>
+        
+        <div class="input-group bg-color-option" id="bg-color-container">
+            <label for="light-color">Колір фону</label>
+            <div class="color-picker">
+                <input type="color" id="light-color" value="#FFFFFF" style="margin-right: 5px;">
+                <div class="color-display" id="light-color-display" style="background-color: #FFFFFF; flex-grow: 1;"></div>
+            </div>
+        </div>
+        
+        <div class="input-group transparent-bg">
+            <div class="transparent-text">
+                <span>Прозорий фон</span>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" id="transparent-bg">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        
+        <button id="generate-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                <path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3z"></path>
+                <path d="M15 15h2v2h-2z"></path>
+                <path d="M20 15h1v1h-1z"></path>
+                <path d="M21 20h-3v-2h2v-2h2z"></path>
+                <path d="M15 21h2v-2h-2z"></path>
+                <path d="M18 21h2v-2h-2z"></path>
+            </svg>
+            Згенерувати QR-код
+        </button>
+        
+        <div class="qr-container">
+            <div id="qrcode"></div>
+            <div class="download-options" id="download-options">
+                <div class="format-selector">
+                    <div class="format-option active" data-format="png">PNG</div>
+                    <div class="format-option" data-format="svg">SVG</div>
+                    <div class="format-option" data-format="jpeg">JPEG</div>
+                </div>
+                <button id="download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
+                    Завантажити QR-код
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="input-group">
-      <label for="correction">Рівень корекції</label>
-      <select id="correction">
-        <option value="L">Низький (7%)</option>
-        <option value="M">Середній (15%)</option>
-        <option value="Q">Високий (25%)</option>
-        <option value="H" selected>Дуже високий (30%)</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="input-group">
-    <label for="dark-color">Колір QR-коду</label>
-    <div class="color-picker">
-      <input type="color" id="dark-color" value="#000000">
-      <div class="color-display" id="dark-color-display" style="background-color: #000000;"></div>
-    </div>
-  </div>
-
-  <div class="input-group">
-    <label for="light-color">Колір фону</label>
-    <div class="color-picker">
-      <input type="color" id="light-color" value="#FFFFFF">
-      <div class="color-display" id="light-color-display" style="background-color: #FFFFFF;"></div>
-    </div>
-  </div>
-
-  <button id="generate-btn">Згенерувати QR-код</button>
-
-  <div class="qr-container">
-    <div id="qrcode"></div>
-    <button id="download-btn">Завантажити QR-код</button>
-  </div>
-</div>
-
-<script>
-	// Отримання всіх необхідних елементів
-	const textInput = document.getElementById('text');
-	const sizeSelect = document.getElementById('size');
-	const correctionSelect = document.getElementById('correction');
-	const darkColorInput = document.getElementById('dark-color');
-	const lightColorInput = document.getElementById('light-color');
-	const darkColorDisplay = document.getElementById('dark-color-display');
-	const lightColorDisplay = document.getElementById('light-color-display');
-	const generateBtn = document.getElementById('generate-btn');
-	const qrcodeDiv = document.getElementById('qrcode');
-	const downloadBtn = document.getElementById('download-btn');
-
-	// Змінні для зберігання QR-коду та його параметрів
-	let qrcode = null;
-	let qrSize = 256;
-	let qrText = 'https://example.com';
-	let qrDarkColor = '#000000';
-	let qrLightColor = '#FFFFFF';
-	let qrCorrection = 'H';
-
-	// Оновлення відображення кольорів при зміні
-	darkColorInput.addEventListener('input', function() {
-		darkColorDisplay.style.backgroundColor = this.value;
-		qrDarkColor = this.value;
-	});
-
-	lightColorInput.addEventListener('input', function() {
-		lightColorDisplay.style.backgroundColor = this.value;
-		qrLightColor = this.value;
-	});
-
-	// Генерація QR-коду при натисканні на кнопку
-	generateBtn.addEventListener('click', generateQRCode);
-
-	// Функція для генерації QR-коду
-	function generateQRCode() {
-		// Отримання значень з полів
-		qrText = textInput.value || 'https://example.com';
-		qrSize = parseInt(sizeSelect.value);
-		qrDarkColor = darkColorInput.value;
-		qrLightColor = lightColorInput.value;
-		qrCorrection = correctionSelect.value;
-
-		// Очищення попереднього QR-коду
-		qrcodeDiv.innerHTML = '';
-
-		// Створення нового QR-коду
-		qrcode = new QRCode(qrcodeDiv, {
-			text: qrText,
-			width: qrSize,
-			height: qrSize,
-			colorDark: qrDarkColor,
-			colorLight: qrLightColor,
-			correctLevel: getCorrectLevel(qrCorrection)
-		});
-
-		// Показуємо кнопку завантаження
-		downloadBtn.style.display = 'block';
-	}
-
-	// Конвертація рівня корекції з букв в константи бібліотеки
-	function getCorrectLevel(level) {
-		switch(level) {
-			case 'L': return QRCode.CorrectLevel.L;
-			case 'M': return QRCode.CorrectLevel.M;
-			case 'Q': return QRCode.CorrectLevel.Q;
-			case 'H': return QRCode.CorrectLevel.H;
-			default: return QRCode.CorrectLevel.H;
-		}
-	}
-
-	// Завантаження QR-коду як зображення
-	downloadBtn.addEventListener('click', function() {
-		// Пошук IMG елемента в контейнері QR-коду
-		const img = qrcodeDiv.querySelector('img');
-		if (img) {
-			// Створення тимчасового посилання для завантаження
-			const link = document.createElement('a');
-			link.href = img.src;
-			link.download = 'qrcode.png';
-
-			// Імітація кліку для завантаження
-			document.body.appendChild(link);
-			link.click();
-			document.body.removeChild(link);
-		}
-	});
-
-	// Генерація QR-коду при завантаженні сторінки
-	window.onload = generateQRCode;
-</script>
+    <script>
+        // Отримання всіх необхідних елементів
+        const textInput = document.getElementById('text');
+        const sizeSelect = document.getElementById('size');
+        const correctionSelect = document.getElementById('correction');
+        const darkColorInput = document.getElementById('dark-color');
+        const lightColorInput = document.getElementById('light-color');
+        const darkColorDisplay = document.getElementById('dark-color-display');
+        const lightColorDisplay = document.getElementById('light-color-display');
+        const transparentBgCheckbox = document.getElementById('transparent-bg');
+        const generateBtn = document.getElementById('generate-btn');
+        const qrcodeDiv = document.getElementById('qrcode');
+        const downloadBtn = document.getElementById('download-btn');
+        const downloadOptions = document.getElementById('download-options');
+        const formatOptions = document.querySelectorAll('.format-option');
+        
+        // Змінні для зберігання QR-коду та його параметрів
+        let qrcode = null;
+        let qrSize = 256;
+        let qrText = 'https://example.com';
+        let qrDarkColor = '#000000';
+        let qrLightColor = '#FFFFFF';
+        let qrCorrection = 'H';
+        let isTransparent = false;
+        let selectedFormat = 'png';
+        
+        // Оновлення відображення кольорів при зміні
+        darkColorInput.addEventListener('input', function() {
+            darkColorDisplay.style.backgroundColor = this.value;
+            qrDarkColor = this.value;
+        });
+        
+        lightColorInput.addEventListener('input', function() {
+            lightColorDisplay.style.backgroundColor = this.value;
+            qrLightColor = this.value;
+        });
+        
+        // Обробники подій для вибору формату
+        formatOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // Видаляємо активний клас з усіх опцій
+                formatOptions.forEach(opt => opt.classList.remove('active'));
+                // Додаємо активний клас до поточної опції
+                this.classList.add('active');
+                // Оновлюємо обраний формат
+                selectedFormat = this.getAttribute('data-format');
+            });
+        });
+        
+        // Обробник подій для прапорця "прозорий фон"
+        transparentBgCheckbox.addEventListener('change', function() {
+            isTransparent = this.checked;
+            const bgColorContainer = document.getElementById('bg-color-container');
+            
+            if (isTransparent) {
+                bgColorContainer.classList.add('hidden');
+            } else {
+                bgColorContainer.classList.remove('hidden');
+            }
+            
+            lightColorInput.disabled = isTransparent;
+        });
+        
+        // Генерація QR-коду при натисканні на кнопку
+        generateBtn.addEventListener('click', generateQRCode);
+        
+        // Функція для генерації QR-коду
+        function generateQRCode() {
+            // Отримання значень з полів
+            qrText = textInput.value || 'https://example.com';
+            qrSize = parseInt(sizeSelect.value);
+            qrDarkColor = darkColorInput.value;
+            qrCorrection = correctionSelect.value;
+            qrLightColor = isTransparent ? 'transparent' : lightColorInput.value;
+            
+            // Очищення попереднього QR-коду
+            qrcodeDiv.innerHTML = '';
+            
+            // Створення нового QR-коду
+            qrcode = new QRCode(qrcodeDiv, {
+                text: qrText,
+                width: qrSize,
+                height: qrSize,
+                colorDark: qrDarkColor,
+                colorLight: qrLightColor,
+                correctLevel: getCorrectLevel(qrCorrection)
+            });
+            
+            // Показуємо кнопку завантаження
+            downloadOptions.style.display = 'block';
+            
+            // Якщо обрано прозорий фон, робимо фон QR-коду прозорим
+            if (isTransparent) {
+                setTimeout(function() {
+                    const img = qrcodeDiv.querySelector('img');
+                    if (img) {
+                        // Створюємо канвас і малюємо QR-код з прозорим фоном
+                        const canvas = document.createElement('canvas');
+                        canvas.width = qrSize;
+                        canvas.height = qrSize;
+                        const ctx = canvas.getContext('2d');
+                        
+                        // Завантажуємо зображення в канвас
+                        img.onload = function() {
+                            ctx.drawImage(img, 0, 0, qrSize, qrSize);
+                            
+                            // Отримуємо дані зображення
+                            const imageData = ctx.getImageData(0, 0, qrSize, qrSize);
+                            const data = imageData.data;
+                            
+                            // Проходимо через всі пікселі і робимо білі (255,255,255) пікселі прозорими
+                            for (let i = 0; i < data.length; i += 4) {
+                                if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) {
+                                    data[i + 3] = 0; // Альфа-канал = 0 (повністю прозорий)
+                                }
+                            }
+                            
+                            // Застосовуємо зміни
+                            ctx.putImageData(imageData, 0, 0);
+                            
+                            // Заміняємо оригінальне зображення на канвас
+                            img.src = canvas.toDataURL('image/png');
+                        };
+                        
+                        // Перезавантажуємо зображення, щоб активувати onload
+                        const originalSrc = img.src;
+                        img.src = originalSrc;
+                    }
+                }, 50); // Невелика затримка, щоб QR-код встиг створитися
+            }
+        }
+        
+        // Конвертація рівня корекції з букв в константи бібліотеки
+        function getCorrectLevel(level) {
+            switch(level) {
+                case 'L': return QRCode.CorrectLevel.L;
+                case 'M': return QRCode.CorrectLevel.M;
+                case 'Q': return QRCode.CorrectLevel.Q;
+                case 'H': return QRCode.CorrectLevel.H;
+                default: return QRCode.CorrectLevel.H;
+            }
+        }
+        
+        // Завантаження QR-коду як зображення
+        downloadBtn.addEventListener('click', function() {
+            // Пошук IMG елемента в контейнері QR-коду
+            const img = qrcodeDiv.querySelector('img');
+            if (img) {
+                // Створюємо canvas для обробки зображення
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Встановлюємо розмір canvas відповідно до розміру QR-коду
+                canvas.width = qrSize;
+                canvas.height = qrSize;
+                
+                // Створюємо тимчасове зображення для завантаження в canvas
+                const tempImg = new Image();
+                tempImg.crossOrigin = "Anonymous";
+                
+                tempImg.onload = function() {
+                    // Якщо прозорий фон, обробляємо зображення
+                    if (isTransparent) {
+                        // Малюємо зображення на canvas
+                        ctx.drawImage(tempImg, 0, 0, qrSize, qrSize);
+                        
+                        // Отримуємо дані зображення
+                        const imageData = ctx.getImageData(0, 0, qrSize, qrSize);
+                        const data = imageData.data;
+                        
+                        // Проходимо через всі пікселі і робимо білі (255,255,255) пікселі прозорими
+                        for (let i = 0; i < data.length; i += 4) {
+                            if (data[i] === 255 && data[i + 1] === 255 && data[i + 2] === 255) {
+                                data[i + 3] = 0; // Альфа-канал = 0 (повністю прозорий)
+                            }
+                        }
+                        
+                        // Застосовуємо зміни
+                        ctx.putImageData(imageData, 0, 0);
+                    } else {
+                        // Просто малюємо зображення, якщо не потрібний прозорий фон
+                        ctx.drawImage(tempImg, 0, 0, qrSize, qrSize);
+                    }
+                    
+                    // Визначаємо формат та налаштування для завантаження
+                    let mimeType, fileName, quality;
+                    
+                    switch(selectedFormat) {
+                        case 'svg':
+                            // Створюємо SVG з Canvas даних
+                            // Оскільки безпосередньо Canvas->SVG складно, створимо особливий SVG
+                            const svgData = generateSVG(tempImg);
+                            // Створення Blob з SVG даними
+                            const svgBlob = new Blob([svgData], {type: 'image/svg+xml'});
+                            // Створюємо URL для завантаження
+                            const svgUrl = URL.createObjectURL(svgBlob);
+                            // Завантажуємо файл
+                            downloadFile(svgUrl, 'qrcode.svg');
+                            return;
+                        case 'jpeg':
+                            mimeType = 'image/jpeg';
+                            fileName = isTransparent ? 'qrcode_with_bg.jpg' : 'qrcode.jpg';
+                            quality = 1.0; // Найвища якість
+                            
+                            // JPEG не підтримує прозорість, тому додаємо білий фон
+                            if (isTransparent) {
+                                // Зберігаємо поточне зображення
+                                const tempData = ctx.getImageData(0, 0, qrSize, qrSize);
+                                // Очищуємо canvas білим кольором
+                                ctx.fillStyle = '#FFFFFF';
+                                ctx.fillRect(0, 0, qrSize, qrSize);
+                                // Накладаємо QR-код на білий фон
+                                ctx.putImageData(tempData, 0, 0);
+                            }
+                            break;
+                        case 'png':
+                        default:
+                            mimeType = 'image/png';
+                            fileName = isTransparent ? 'qrcode_transparent.png' : 'qrcode.png';
+                            quality = 1.0;
+                            break;
+                    }
+                    
+                    // Отримуємо URL зображення з canvas
+                    const imgUrl = canvas.toDataURL(mimeType, quality);
+                    
+                    // Завантажуємо файл
+                    downloadFile(imgUrl, fileName);
+                };
+                
+                // Завантажуємо зображення QR-коду в тимчасове зображення
+                tempImg.src = img.src;
+            }
+        });
+        
+        // Функція для генерації SVG з зображення
+        function generateSVG(img) {
+            // Створюємо тимчасовий canvas для зчитування даних пікселів
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = qrSize;
+            tempCanvas.height = qrSize;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(img, 0, 0, qrSize, qrSize);
+            
+            // Отримуємо дані пікселів
+            const imageData = tempCtx.getImageData(0, 0, qrSize, qrSize);
+            const data = imageData.data;
+            
+            // Визначаємо розмір кожного "квадратика" QR-коду
+            // Типовий QR-код - це сітка 25x25 для версії 1 (найменший)
+            // Але може бути більше залежно від кількості даних
+            // Припустимо, що ми знайдемо розмір, перевіряючи зображення
+            
+            // Визначимо розмір модуля (квадратика) QR-коду
+            const moduleSize = qrSize / 25; // Приблизна оцінка, може потребувати корекції
+            
+            // Створюємо SVG
+            let svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${qrSize} ${qrSize}" width="${qrSize}" height="${qrSize}">`;
+            
+            // Якщо фон не прозорий, додаємо прямокутник фону
+            if (!isTransparent) {
+                svg += `<rect width="${qrSize}" height="${qrSize}" fill="${qrLightColor}" />`;
+            }
+            
+            // Проходимо по зображенню з кроком moduleSize і додаємо квадрати
+            for (let y = 0; y < qrSize; y += moduleSize) {
+                for (let x = 0; x < qrSize; x += moduleSize) {
+                    // Перевіряємо колір центрального пікселя модуля
+                    const centerX = Math.floor(x + moduleSize / 2);
+                    const centerY = Math.floor(y + moduleSize / 2);
+                    const pixelIndex = (centerY * qrSize + centerX) * 4;
+                    
+                    // Якщо піксель чорний (або близький до чорного), додаємо квадрат
+                    if (data[pixelIndex] < 128 && data[pixelIndex + 1] < 128 && data[pixelIndex + 2] < 128) {
+                        svg += `<rect x="${x}" y="${y}" width="${moduleSize}" height="${moduleSize}" fill="${qrDarkColor}" />`;
+                    }
+                }
+            }
+            
+            svg += '</svg>';
+            return svg;
+        }
+        
+        // Функція для завантаження файлу
+        function downloadFile(url, fileName) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            // Очищаємо URL об'єкт, якщо він був створений з Blob
+            if (url.startsWith('blob:')) {
+                URL.revokeObjectURL(url);
+            }
+        }
+        
+        // Генерація QR-коду при завантаженні сторінки
+        window.onload = generateQRCode;
+    </script>
 </body>
 </html>
